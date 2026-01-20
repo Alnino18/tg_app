@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Salad Pro UI</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #FF5E00;
+            --bg: #F2F2F7;
+            --card: #FFFFFF;
+            --text: #1C1C1E;
+            --hint: #8E8E93;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        /* Экран выбора локации */
+        #screen-loc {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 24px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .search-container { position: sticky; top: 10px; z-index: 100; margin-bottom: 20px; }
+        .logo-container {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+        .logo-container img { width: 75px; height: 75px; border-radius: 50%; }
+
+        .loc-list { width: 100%; display: grid; gap: 12px; }
+        .loc-item {
+            background: var(--card);
+            padding: 18px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            transition: transform 0.1s;
+        }
+        .loc-item:active { transform: scale(0.97); background: #f9f9f9; }
+        .loc-icon { font-size: 20px; margin-right: 12px; }
+
+        /* Основной экран */
+        #screen-main { display: none; padding: 20px 16px 140px; }
+        .header { margin-bottom: 20px; }
+        .header h1 { font-size: 26px; margin: 0; font-weight: 700; }
+
+        /* Карточка товара */
+        .item-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .item-name { font-weight: 600; font-size: 15px; flex: 1; margin-right: 10px; }
+
+        /* КОМБИНИРОВАННЫЙ СТЕППЕР */
+        .stepper {
+            display: flex;
+            align-items: center;
+            background: #F2F2F7;
+            border-radius: 12px;
+            padding: 3px;
+            border: 1px solid #E5E5EA;
+        }
+
+        .step-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            border: none;
+            background: white;
+            color: var(--accent);
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+
+        /* Поле для текстового ввода внутри степпера */
+        .step-input {
+            width: 50px;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
+            outline: none;
+        }
+
+        /* Убираем стрелочки у input number */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* Футер */
+        .footer {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px);
+            padding: 20px 16px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .main-button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 8px 15px rgba(255, 94, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div id="screen-loc">
+    <img src="logo.png" class="logo" alt="Salad Logo">
+    <h2 style="margin: 0 0 10px;">Salad Pro</h2>
+    <p style="color: var(--hint); margin: 0 0 30px;">Где вы работаете?</p>
+    <div class="loc-list">
+        <div class="loc-item" onclick="openMenu('Эко Бозор')"><span class="loc-icon">🛒</span>Эко Бозор</div>
+        <div class="loc-item" onclick="openMenu('Сергили Дехкон Бозор')"><span class="loc-icon">🛒</span>Сергили Дехкон Бозор</div>
+        <div class="loc-item" onclick="openMenu('Сергили Ярмарка')"><span class="loc-icon">🛒</span>Сергили Ярмарка</div>
+    </div>
+</div>
+
+<div id="screen-main">
+    <div class="header">
+        <p id="loc-badge" style="color: var(--accent); font-weight: 600; font-size: 12px; margin-bottom: 4px;"></p>
+        <h1>Новая накладная</h1>
+    </div>
+    <div class="search-container">
+        <input type="text" id="search" class="search-input" placeholder="Найти салат...">
+    </div>
+    <div id="list-container"></div>
+    <div class="footer">
+        <button class="main-button" onclick="finishOrder()">Оформить Заказ</button>
+    </div>
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    let selectedLoc = "";
+    const items = ["Ашланфу", "Баклажан и дунганский перец жареный", "Баклажаны и кабачки жареные", 
+  "Баклажаны маринованные", "Баклажаны соте", "Баклажаны сухие", "Винегрет", 
+  "Витаминка", "Грибное ассорти", "Грибы древесные", "Грибы жареные", 
+  "Грибы маринованные", "Грибы шампиньоны", "Грибы шитаки", "Капуста сладкая", 
+  "Кочи нипи", "Креветки", "Лечо", "Марковча", "Марковча не крашенная", 
+  "Маш", "Морская капуста", "Огурцы", "Перец жареный", "Свёкла", "Соя мясо", 
+  "Спаржа", "Стрелки", "Тиби", "Тофу салат", "Фаршированный перец", "Фунчоза", 
+  "Хе куриное", "Хе мясное", "Хе рыба", "Хе три буха", "Галовка капуста", 
+  "Шпинат","Армянский капуста", "Дайкон маринованный", "Дайкон салат", 
+  "Зверобой", "Капуста кимчи", "Квашеная капуста не сладкая", 
+  "Квашеная капуста сладкая", "Маринованный огурцы", "Маринованный помидор", 
+  "Редиска чимчи", "Солёные ассорти", "Солёные огурцы", "Солёные памидор", 
+  "Чеснок маринованный", "Чимчи", "Женский каприз", "Крабовые", "Мужской каприз", 
+  "Оливье", "Чартоги", "Варенка", "Горчица", "Лозижон", "Маченка", 
+  "Нори Большой", "Нори Маленький", "Пигодя крахмальные", "Пигодя рисовый", 
+  "Спаржа сухая", "Халапено", "Тирой", "Борсик йог", "Гоз йог", "Цяй жареный", 
+  "Уксус", "Фунчоза сухая", "Чинпени", "Чипс", "Кукси"];
+    let cart = {};
+
+    function openMenu(loc, icon) {
+        selectedLoc = loc;
+        document.getElementById('screen-loc').style.display = 'none';
+        document.getElementById('screen-main').style.display = 'block';
+        document.getElementById('loc-badge').innerText =  "🛒 " + loc.toUpperCase();
+        renderItems();
+    }
+
+    function renderItems() {
+        const container = document.getElementById('list-container');
+        container.innerHTML = items.map(name => `
+            <div class="item-card">
+                <span class="item-name">${name}</span>
+                <div class="stepper">
+                    <button class="step-btn" onclick="changeQty('${name}', -1)">−</button>
+                    <input type="number" 
+                           class="step-input" 
+                           id="input-${name}" 
+                           value="0" 
+                           oninput="updateManual('${name}', this.value)"
+                           onfocus="this.select()">
+                    <button class="step-btn" onclick="changeQty('${name}', 1)">+</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Изменение через кнопки +/-
+    function changeQty(name, delta) {
+        if (!cart[name]) cart[name] = 0;
+        cart[name] = Math.max(0, cart[name] + delta);
+        document.getElementById(`input-${name}`).value = cart[name];
+        tg.HapticFeedback.impactOccurred('light');
+    }
+
+    // Прямой ввод текста
+    function updateManual(name, value) {
+        let num = parseInt(value);
+        if (isNaN(num) || num < 0) num = 0;
+        cart[name] = num;
+    }
+
+    function finishOrder() {
+        let finalData = [];
+        for (let name in cart) {
+            if (cart[name] > 0) finalData.push({ name: name, qty: cart[name], unit: "кг" });
+        }
+        
+        if (finalData.length === 0) {
+            tg.showAlert("Вы не ввели количество ни для одного товара!");
+            return;
+        }
+
+        tg.sendData(JSON.stringify({ location: selectedLoc, order: finalData }));
+    }
+</script>
+</body>
+</html>
