@@ -9,7 +9,7 @@ from fpdf import FPDF
 
 # --- ДАННЫЕ БОТА ---
 
-TOKEN = '7582703033:AAEuaGaQmIcZdacqsItkaf7Hu9ou0dsREzI'
+TOKEN = '7598063145:AAFBQFceoEI8_9BzXQ2t3pPvb58_wpc4qc8'
 GROUP_ID = -1003399244861  # ID вашей группы (с -100)
 URL = 'https://alnino18.github.io/tg-app/' # Ссылка на index.html
 
@@ -88,4 +88,5 @@ async def main():
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
+
     asyncio.run(main())
